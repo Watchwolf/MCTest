@@ -1,0 +1,23 @@
+
+{% extends 'templates/skeleton.html' %}
+{% block title %}Ajouter une copropriété{% endblock %}
+
+{% block content %}
+
+<form action="." method="POST">
+    {% csrf_token %}
+    <h2>Ajouter une copropriété</h2>
+
+    <div class="form-group">
+        <label for="filter">Adresse WEB sur bienici.com</label>
+        <input type="text" id="url" name="url" required
+               aria-describedby="url-aide">
+        <small id="url-aide" style="font-size: 0.8em; color: #888;">
+            Vous pouvez ajouter une copropriété en saisissant son adresse sur le site bienici.com. Par exemple: https://www.bienici.com/annonce/vente/paris-12e/appartement/3pieces/century-21-202_2907_27607
+        </small>
+    </div>
+
+    <button type="submit">Rechercher</button>
+</form>
+
+{% endblock %}

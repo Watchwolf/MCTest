@@ -1,0 +1,5 @@
+Le projet n'utilise pas de bases de données
+
+Pour démarrer le projet : 
+source venv/bin/activate  (Windows: venv\Scripts\activate)
+python3 manage.py runserver
