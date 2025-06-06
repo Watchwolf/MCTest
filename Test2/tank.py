@@ -1,65 +1,79 @@
-class Tank:
-    def __init__(self, armor, penetration, armor_type):
+import unittest
+
+
+class ArmorType():
+    """
+    Description d'une armure de tank avec en particulier le bonus d'armure qu'elle donne
+    """
+    name: str = None
+    bonus: int = 0
+
+    def __init__(self, name: str, bonus: int):
+        self.name = name
+        self.bonus = bonus
+
+
+class Tank():
+    """
+    Description d'un tank avec son nom, la pénétration de son canon, son armure et son type d'armure
+    """
+    name: str = ''
+    penetration: int = 0
+    armor: int = 0
+    armor_type: ArmorType = None
+
+    def __init__(self, name: str, penetration: int, armor: int, armor_type: ArmorType):
         self.armor = armor
         self.penetration = penetration
         self.armor_type = armor_type
-        if not (armor_type == 'chobham' or armor_type == 'composite' or armor_type == 'ceramic'):
-            raise Exception('Invalid armor type %s' % (armor_type))
-        self.tank = "Tank"
-
-    def set_name(self, name):
         self.name = name
 
-    def vulnerable(self, tank):
-        real_armor = self.armor
-        if self.armor_type == 'chobham':
-            real_armor += 100
-        elif self.armor_type == 'composite':
-            real_armor += 50
-        elif self.armor_type == 'ceramic':
-            real_armor += 50
-        if real_armor <= tank.penetration: return True
-        return False
+    def is_vulnerable_to_tank(self, tank: 'Tank'):
+        return self.armor + self.armor_type.bonus <= tank.penetration
 
     def swap_armor(self, othertank):
-        tmp = othertank.armor
-        othertank.armor = self.armor
-        self.armor = tmp
-        return othertanktest
+        (self.armor, othertank.armor) = (othertank.armor, self.armor)
 
     def __repr__(self):
-        tmp = self.name.lower()
-        tmp = self.name.replace(' ', '-')
-        return tmp
+        return self.name.lower().replace(' ', '-')
 
+class TestTank(unittest.TestCase):
+    armorChobham: ArmorType = ArmorType('chobham', 100)
+    armorComposite: ArmorType = ArmorType('composite', 50)
+    armorCeramic: ArmorType = ArmorType('ceramic', 50)
+    armorSteel: ArmorType = ArmorType('steel', 10)
+    
+    def test_penetration_simple(self):
+        tank1: Tank = Tank('Tank1', 670, 600, self.armorChobham)
 
-m1_1 = Tank(600, 670, 'chobham')
-m1_2 = Tank(620, 670, 'chobham')
-if m1_1.vulnerable(m1_2) is True:
-    print('Vulnerable to self')
-m1_1.swap_armor(m1_2)
-tanks = []
-for i in range(5):
-    tanks.append(Tank(400, 400, 'steel'))
-index = 0
-for tank in tanks:
-    tank.set_name('Tank' + str(index) + "_Small")
-    index += 1
-test = []
-index = 0
-while index < len(tanks):
-    test.append(tanks[i].vulnerable(m1_1))
+        tank2: Tank = Tank('Tank2', 670, 620, self.armorChobham)
+        self.assertEqual(tank1.is_vulnerable_to_tank(tank2), False)
 
+        tank2: Tank = Tank('Tank2', 1000, 620, self.armorChobham)
+        self.assertEqual(tank1.is_vulnerable_to_tank(tank2), True)
 
-def test_tank_safe(shooter, test_vehicles=[]):
-    at_least_one_safe = False
-    for t in test:
-        if t:
-            at_least_one_safe = True
-    if at_least_one_safe:
-        print("A tank is safe")
-    else:
-        print("No tank is safe")
+    def test_penetration_accurate(self):
+        shooter: Tank = Tank('Tank1', 450, 0, self.armorChobham)
 
+        tanks: list[Tank] = []
+        tanks.append(Tank('Tank 1', 0, 400, self.armorSteel))
+        tanks.append(Tank('Tank 2', 0, 430, self.armorSteel))
+        tanks.append(Tank('Tank 3', 0, 440, self.armorSteel))
+        tanks.append(Tank('Tank 4', 0, 450, self.armorSteel))
+        tanks.append(Tank('Tank 5', 0, 500, self.armorSteel))
 
-test_tank_safe(m1_1, tanks)
+        self.assertEqual(tanks[0].is_vulnerable_to_tank(shooter), True)
+        self.assertEqual(tanks[1].is_vulnerable_to_tank(shooter), True)
+        self.assertEqual(tanks[2].is_vulnerable_to_tank(shooter), True)
+        self.assertEqual(tanks[3].is_vulnerable_to_tank(shooter), False)
+        self.assertEqual(tanks[4].is_vulnerable_to_tank(shooter), False)
+
+    def test_swap_armor(self):
+        tank1: Tank = Tank('Tank1', 670, 600, self.armorChobham)
+        tank2: Tank = Tank('Tank2', 670, 620, self.armorChobham)
+
+        tank1.swap_armor(tank2)
+        self.assertEqual(tank1.armor, 620)
+        self.assertEqual(tank2.armor, 600)
+
+unittest.main()
